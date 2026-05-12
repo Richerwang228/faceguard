@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceGuard — 视频打码隐私自检工具</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e17;
+            --bg-card: #111827;
+            --bg-hover: #1a2332;
+            --border: #2a3441;
+            --text: #e8ecf1;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --green: #22c55e;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 100px 0 60px;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 600px; height: 400px;
+            background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: var(--green);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff, #3b82f6, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+        .hero p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            font-weight: 300;
+        }
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            color: white;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(37,99,235,0.5);
+        }
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        /* Features */
+        .features { padding: 80px 0; }
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 48px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            border-color: #3b4d63;
+            transform: translateY(-4px);
+        }
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+        .feature-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* How it works */
+        .how-it-works { padding: 80px 0; background: var(--bg-card); }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+        .step {
+            text-align: center;
+        }
+        .step-num {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 auto 16px;
+        }
+        .step h4 { font-size: 18px; margin-bottom: 8px; }
+        .step p { color: var(--text-secondary); font-size: 14px; }
+
+        /* Privacy */
+        .privacy { padding: 80px 0; text-align: center; }
+        .privacy-grid {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            margin-top: 32px;
+        }
+        .privacy-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--green);
+            font-size: 15px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        footer a { color: var(--blue); text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 16px; }
+            .cta-group { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: 300px; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🔒 本地处理 · 零上传 · 开源可审计</div>
+            <h1>FaceGuard</h1>
+            <p>视频打码隐私自检工具。上传已打码的视频，AI 自动检测是否有人脸露出，确保每一帧都安全。</p>
+            <div class="cta-group">
+                <a href="https://f695985d795a77e9-161-81-224-255.serveousercontent.com" class="btn btn-primary" target="_blank">
+                    🚀 立即体验
+                </a>
+                <a href="https://github.com/Richerwang228/faceguard" class="btn btn-secondary" target="_blank">
+                    📂 GitHub 源码
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">功能特性</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">👤</div>
+                    <h3>人脸检测</h3>
+                    <p>支持正面 + 侧面人脸检测，高速运动场景优化，人物快速移动不丢失追踪。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎭</div>
+                    <h3>四种打码检测</h3>
+                    <p>自动识别高斯模糊、马赛克像素块、黑色方块、贴纸遮挡四种打码方式。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📸</div>
+                    <h3>问题帧截图</h3>
+                    <p>精确标注问题时间点，附带截图证据，红色虚线框标记露出的人脸位置。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h3>自适应抽帧</h3>
+                    <p>根据视频时长智能调整采样率，短视频高精度检测，长视频快速处理。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>可视化报告</h3>
+                    <p>生成 HTML 报告 + 文字报告，含时间轴、人物状态统计、下载分享功能。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>隐私优先</h3>
+                    <p>纯本地处理，视频不上传任何服务器，处理完成后立即删除，开源可审计。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">三步完成检测</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h4>上传视频</h4>
+                    <p>支持 MP4、MOV、MKV、WebM 格式，最大 500MB</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h4>AI 自动检测</h4>
+                    <p>逐帧分析人脸打码质量，智能追踪多个人物</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h4>查看报告</h4>
+                    <p>问题帧截图、时间轴、HTML 报告一键下载</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="privacy">
+        <div class="container">
+            <h2 class="section-title">你的隐私，我们守护</h2>
+            <div class="privacy-grid">
+                <div class="privacy-item">✓ 视频完全在本地处理</div>
+                <div class="privacy-item">✓ 不上传任何第三方服务器</div>
+                <div class="privacy-item">✓ 处理完成后立即删除</div>
+                <div class="privacy-item">✓ 开源代码，透明可审计</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero" style="padding: 60px 0;">
+        <div class="container">
+            <h2 style="font-size: 32px; margin-bottom: 16px;">准备好检查你的视频了吗？</h2>
+            <p style="margin-bottom: 32px;">免费使用，无需注册，打开即用</p>
+            <div class="cta-group">
+                <a href="https://f695985d795a77e9-161-81-224-255.serveousercontent.com" class="btn btn-primary" target="_blank">
+                    🚀 立即体验
+                </a>
+                <a href="https://streamlit.io/cloud" class="btn btn-secondary" target="_blank">
+                    ☁️ 一键部署到 Streamlit Cloud
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>FaceGuard · 视频打码隐私自检工具</p>
+            <p style="margin-top: 8px;">
+                <a href="https://github.com/Richerwang228/faceguard" target="_blank">GitHub</a> ·
+                <a href="https://github.com/Richerwang228/faceguard/blob/main/LICENSE" target="_blank">MIT License</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

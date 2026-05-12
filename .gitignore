@@ -140,6 +140,7 @@ uploads/
 *.avi
 *.html
 !templates/*.html
+!docs/**/*.html
 
 # Test images/videos (generated locally)
 tests/test_videos/
