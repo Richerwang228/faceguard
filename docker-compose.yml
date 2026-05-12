@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  privacy-video-checker:
+    build: .
+    container_name: privacy-video-checker
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_ENABLE_CORS=false
+    restart: unless-stopped
+    volumes:
+      - ./uploads:/app/uploads

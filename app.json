@@ -1,0 +1,24 @@
+{
+  "name": "privacy-video-checker",
+  "description": "AI-powered video mosaic privacy compliance checker",
+  "repository": "https://github.com/yourusername/privacy-video-checker",
+  "logo": "https://raw.githubusercontent.com/yourusername/privacy-video-checker/main/assets/logo.png",
+  "keywords": ["privacy", "video", "mosaic", "face-detection", "streamlit", "opencv"],
+  "env": {
+    "STREAMLIT_SERVER_HEADLESS": {
+      "description": "Run Streamlit in headless mode",
+      "value": "true"
+    },
+    "STREAMLIT_SERVER_PORT": {
+      "description": "Server port",
+      "value": "8501"
+    }
+  },
+  "build": {
+    "docker": {
+      "dockerfilePath": "Dockerfile"
+    }
+  },
+  "healthCheckPath": "/_stcore/health",
+  "port": 8501
+}
