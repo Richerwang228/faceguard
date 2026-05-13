@@ -1,326 +1,679 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaceGuard — 视频打码隐私自检工具</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0a0e17;
-            --bg-card: #111827;
-            --bg-hover: #1a2332;
-            --border: #2a3441;
-            --text: #e8ecf1;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --green: #22c55e;
-            --red: #ef4444;
-            --amber: #f59e0b;
-            --blue: #3b82f6;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Noto Sans SC', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VeilVid — 视频打码隐私自检</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Noto+Serif+SC:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<style>
+:root{
+  --bg:#faf9f7;
+  --bg-warm:#f5f0eb;
+  --card:#ffffff;
+  --ink:#1a1a1a;
+  --ink-soft:#4a4a4a;
+  --ink-muted:#8a8a8a;
+  --accent:#b87333;
+  --accent-light:#d4a574;
+  --green:#2d6a4f;
+  --green-soft:#e8f5e9;
+  --red:#9b2226;
+  --red-soft:#fce8e8;
+  --amber:#b35900;
+  --amber-soft:#fff3e0;
+  --border:#e0dcd6;
+  --shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter','Noto Serif SC',-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+.container{max-width:900px;margin:0 auto;padding:0 28px}
 
-        /* Hero */
-        .hero {
-            text-align: center;
-            padding: 100px 0 60px;
-            position: relative;
-        }
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 50%; transform: translateX(-50%);
-            width: 600px; height: 400px;
-            background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .hero-badge {
-            display: inline-block;
-            background: rgba(34,197,94,0.1);
-            border: 1px solid rgba(34,197,94,0.3);
-            color: var(--green);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 24px;
-        }
-        .hero h1 {
-            font-size: 56px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #fff, #3b82f6, #22c55e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
-            letter-spacing: -1px;
-        }
-        .hero p {
-            font-size: 20px;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-            font-weight: 300;
-        }
-        .cta-group {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 32px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a5f, #2563eb);
-            color: white;
-            box-shadow: 0 4px 20px rgba(37,99,235,0.3);
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(37,99,235,0.5);
-        }
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-        }
-        .btn-secondary:hover {
-            background: var(--bg-hover);
-            color: var(--text);
-        }
+/* Typography */
+h1,h2,h3{font-family:'Playfair Display','Noto Serif SC',serif;font-weight:700}
+.display{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;line-height:1.1;letter-spacing:-0.02em}
+@media(max-width:640px){.display{font-size:36px}}
 
-        /* Features */
-        .features { padding: 80px 0; }
-        .section-title {
-            text-align: center;
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 48px;
-        }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-        }
-        .feature-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            transition: all 0.3s ease;
-        }
-        .feature-card:hover {
-            border-color: #3b4d63;
-            transform: translateY(-4px);
-        }
-        .feature-icon {
-            font-size: 40px;
-            margin-bottom: 16px;
-        }
-        .feature-card h3 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .feature-card p {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
+/* Header */
+header{padding:24px 0;border-bottom:1px solid var(--border);background:var(--card)}
+header .container{display:flex;align-items:center;justify-content:space-between}
+.brand{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--ink);text-decoration:none}
+.brand span{color:var(--accent)}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-soft);color:var(--green);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500}
 
-        /* How it works */
-        .how-it-works { padding: 80px 0; background: var(--bg-card); }
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 32px;
-            margin-top: 48px;
-        }
-        .step {
-            text-align: center;
-        }
-        .step-num {
-            width: 48px; height: 48px;
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0 auto 16px;
-        }
-        .step h4 { font-size: 18px; margin-bottom: 8px; }
-        .step p { color: var(--text-secondary); font-size: 14px; }
+/* Hero */
+.hero{text-align:center;padding:72px 0 48px}
+.hero .subtitle{font-size:18px;color:var(--ink-muted);margin-top:16px;max-width:520px;margin-left:auto;margin-right:auto}
+.hero .cta{margin-top:36px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
 
-        /* Privacy */
-        .privacy { padding: 80px 0; text-align: center; }
-        .privacy-grid {
-            display: flex;
-            justify-content: center;
-            gap: 32px;
-            flex-wrap: wrap;
-            margin-top: 32px;
-        }
-        .privacy-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--green);
-            font-size: 15px;
-        }
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:var(--ink-soft);transform:translateY(-1px)}
+.btn-secondary{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 40px 0;
-            border-top: 1px solid var(--border);
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-        footer a { color: var(--blue); text-decoration: none; }
+/* Upload Zone */
+.upload-zone{
+  border:2px dashed var(--border);
+  border-radius:16px;
+  padding:56px 32px;
+  text-align:center;
+  background:var(--card);
+  transition:all .3s;
+  cursor:pointer;
+  position:relative;
+}
+.upload-zone:hover{border-color:var(--accent);background:var(--bg-warm)}
+.upload-zone.dragover{border-color:var(--accent);background:var(--bg-warm);transform:scale(1.01)}
+.upload-zone .icon{font-size:40px;margin-bottom:12px;opacity:.6}
+.upload-zone h3{font-size:18px;font-weight:600;margin-bottom:8px;font-family:Inter,sans-serif}
+.upload-zone p{color:var(--ink-muted);font-size:14px}
+#fileInput{position:absolute;inset:0;opacity:0;cursor:pointer}
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 36px; }
-            .hero p { font-size: 16px; }
-            .cta-group { flex-direction: column; align-items: center; }
-            .btn { width: 100%; max-width: 300px; justify-content: center; }
-        }
-    </style>
+/* Video Preview */
+.video-wrap{margin-top:24px;border-radius:12px;overflow:hidden;background:#000;position:relative;box-shadow:var(--shadow)}
+.video-wrap video{width:100%;display:block;max-height:400px}
+
+/* Progress */
+.progress-wrap{margin-top:24px;background:var(--card);border-radius:12px;padding:24px;border:1px solid var(--border)}
+.progress-bar{height:6px;background:var(--bg-warm);border-radius:3px;overflow:hidden;margin-top:12px}
+.progress-bar-inner{height:100%;background:var(--accent);border-radius:3px;transition:width .3s ease}
+.progress-text{margin-top:12px;font-size:13px;color:var(--ink-muted);font-family:'SF Mono',monospace}
+
+/* Results */
+.results{margin-top:32px}
+.result-banner{
+  border-radius:16px;
+  padding:32px;
+  text-align:center;
+  margin-bottom:32px;
+}
+.result-banner.pass{background:var(--green-soft);border:1px solid #c8e6c9}
+.result-banner.fail{background:var(--red-soft);border:1px solid #ffcdd2}
+.result-banner .emoji{font-size:48px;margin-bottom:8px}
+.result-banner h2{font-size:28px;margin-bottom:8px}
+.result-banner p{color:var(--ink-muted);font-size:15px}
+
+/* Stats Grid */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+@media(max-width:640px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:all .2s}
+.stat-card:hover{box-shadow:var(--shadow)}
+.stat-value{font-size:28px;font-weight:700;font-family:'Playfair Display',serif;color:var(--ink)}
+.stat-label{font-size:12px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+
+/* Person Cards */
+.person-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;transition:all .2s}
+.person-card:hover{box-shadow:var(--shadow)}
+.person-card .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.person-card .name{font-weight:600;font-size:16px}
+.person-card .tag{display:inline-block;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:500}
+.tag-protected{background:var(--green-soft);color:var(--green)}
+.tag-risk{background:var(--amber-soft);color:var(--amber)}
+.tag-exposed{background:var(--red-soft);color:var(--red)}
+.person-card .meta{font-size:13px;color:var(--ink-muted);margin-top:6px}
+
+/* Screenshot Gallery */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:20px}
+.gallery-item{border-radius:10px;overflow:hidden;border:2px dashed var(--red);position:relative;background:#000}
+.gallery-item img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
+.gallery-item .caption{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#fff;padding:6px 10px;font-size:12px;font-family:monospace}
+
+/* Timeline */
+.timeline{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:16px;max-height:280px;overflow-y:auto}
+.timeline-item{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+.timeline-item:last-child{border-bottom:none}
+.timeline-time{font-family:monospace;color:var(--red);min-width:90px;font-size:13px;font-weight:600}
+.timeline-text{color:var(--ink-soft);flex:1}
+
+/* Section Titles */
+.section-title{font-size:22px;margin:32px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--border);display:inline-block}
+
+/* Footer */
+footer{text-align:center;padding:48px 0 32px;border-top:1px solid var(--border);margin-top:48px;color:var(--ink-muted);font-size:13px}
+footer a{color:var(--accent);text-decoration:none}
+
+/* Canvas hidden */
+#processCanvas{display:none}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+</style>
 </head>
 <body>
-    <section class="hero">
-        <div class="container">
-            <div class="hero-badge">🔒 本地处理 · 零上传 · 开源可审计</div>
-            <h1>FaceGuard</h1>
-            <p>视频打码隐私自检工具。上传已打码的视频，AI 自动检测是否有人脸露出，确保每一帧都安全。</p>
-            <div class="cta-group">
-                <a href="https://f695985d795a77e9-161-81-224-255.serveousercontent.com" class="btn btn-primary" target="_blank">
-                    🚀 立即体验
-                </a>
-                <a href="https://github.com/Richerwang228/faceguard" class="btn btn-secondary" target="_blank">
-                    📂 GitHub 源码
-                </a>
-            </div>
-        </div>
-    </section>
 
-    <section class="features">
-        <div class="container">
-            <h2 class="section-title">功能特性</h2>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">👤</div>
-                    <h3>人脸检测</h3>
-                    <p>支持正面 + 侧面人脸检测，高速运动场景优化，人物快速移动不丢失追踪。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎭</div>
-                    <h3>四种打码检测</h3>
-                    <p>自动识别高斯模糊、马赛克像素块、黑色方块、贴纸遮挡四种打码方式。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📸</div>
-                    <h3>问题帧截图</h3>
-                    <p>精确标注问题时间点，附带截图证据，红色虚线框标记露出的人脸位置。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⏱️</div>
-                    <h3>自适应抽帧</h3>
-                    <p>根据视频时长智能调整采样率，短视频高精度检测，长视频快速处理。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>可视化报告</h3>
-                    <p>生成 HTML 报告 + 文字报告，含时间轴、人物状态统计、下载分享功能。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <h3>隐私优先</h3>
-                    <p>纯本地处理，视频不上传任何服务器，处理完成后立即删除，开源可审计。</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<header>
+  <div class="container">
+    <a href="#" class="brand">Veil<span>Vid</span></a>
+    <span class="badge">本地处理 · 零上传</span>
+  </div>
+</header>
 
-    <section class="how-it-works">
-        <div class="container">
-            <h2 class="section-title">三步完成检测</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-num">1</div>
-                    <h4>上传视频</h4>
-                    <p>支持 MP4、MOV、MKV、WebM 格式，最大 500MB</p>
-                </div>
-                <div class="step">
-                    <div class="step-num">2</div>
-                    <h4>AI 自动检测</h4>
-                    <p>逐帧分析人脸打码质量，智能追踪多个人物</p>
-                </div>
-                <div class="step">
-                    <div class="step-num">3</div>
-                    <h4>查看报告</h4>
-                    <p>问题帧截图、时间轴、HTML 报告一键下载</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="container">
 
-    <section class="privacy">
-        <div class="container">
-            <h2 class="section-title">你的隐私，我们守护</h2>
-            <div class="privacy-grid">
-                <div class="privacy-item">✓ 视频完全在本地处理</div>
-                <div class="privacy-item">✓ 不上传任何第三方服务器</div>
-                <div class="privacy-item">✓ 处理完成后立即删除</div>
-                <div class="privacy-item">✓ 开源代码，透明可审计</div>
-            </div>
-        </div>
-    </section>
+<!-- Hero -->
+<section class="hero" id="hero">
+  <h1 class="display">视频打码<br>隐私自检</h1>
+  <p class="subtitle">上传已打码的视频，AI 自动检测是否有人脸露出。<br>确保每一帧都安全，保护内容创作者隐私。</p>
+  <div class="cta">
+    <button class="btn btn-primary" onclick="document.getElementById('uploadArea').scrollIntoView({behavior:'smooth'})">开始检测</button>
+    <a href="https://github.com/Richerwang228/faceguard" class="btn btn-secondary" target="_blank">GitHub 源码</a>
+  </div>
+</section>
 
-    <section class="hero" style="padding: 60px 0;">
-        <div class="container">
-            <h2 style="font-size: 32px; margin-bottom: 16px;">准备好检查你的视频了吗？</h2>
-            <p style="margin-bottom: 32px;">免费使用，无需注册，打开即用</p>
-            <div class="cta-group">
-                <a href="https://f695985d795a77e9-161-81-224-255.serveousercontent.com" class="btn btn-primary" target="_blank">
-                    🚀 立即体验
-                </a>
-                <a href="https://streamlit.io/cloud" class="btn btn-secondary" target="_blank">
-                    ☁️ 一键部署到 Streamlit Cloud
-                </a>
-            </div>
-        </div>
-    </section>
+<!-- Upload -->
+<section id="uploadArea">
+  <div class="upload-zone" id="dropZone">
+    <input type="file" id="fileInput" accept="video/mp4,video/quicktime,video/x-matroska,video/webm">
+    <div class="icon">📁</div>
+    <h3>点击或拖拽视频到此处</h3>
+    <p>支持 MP4、MOV、MKV、WebM 格式 · 最大 500MB</p>
+  </div>
+  <div id="videoPreview"></div>
+</section>
 
-    <footer>
-        <div class="container">
-            <p>FaceGuard · 视频打码隐私自检工具</p>
-            <p style="margin-top: 8px;">
-                <a href="https://github.com/Richerwang228/faceguard" target="_blank">GitHub</a> ·
-                <a href="https://github.com/Richerwang228/faceguard/blob/main/LICENSE" target="_blank">MIT License</a>
-            </p>
+<!-- Processing -->
+<section id="processingArea" style="display:none">
+  <div class="progress-wrap fade-in">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="font-size:16px">🔍 正在检测...</h3>
+      <span id="progressPercent" style="font-family:monospace;color:var(--ink-muted)">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-bar-inner" id="progressBar" style="width:0%"></div></div>
+    <div class="progress-text" id="progressText">初始化模型...</div>
+  </div>
+</section>
+
+<!-- Results -->
+<section id="resultsArea" style="display:none"></section>
+
+<footer>
+  <p>VeilVid · 视频打码隐私自检工具</p>
+  <p style="margin-top:6px"><a href="https://github.com/Richerwang228/faceguard" target="_blank">GitHub</a> · <a href="https://github.com/Richerwang228/faceguard/blob/main/LICENSE" target="_blank">MIT License</a></p>
+</footer>
+
+</div>
+
+<canvas id="processCanvas"></canvas>
+
+<script>
+// ===================== CONFIG =====================
+const CONFIG = {
+  sampleRate: 5,          // frames per second to analyze
+  minFaceSize: 48,        // minimum face size in pixels
+  clarityThreshold: 50,   // score below this = obscured
+  maxScreenshots: 12,     // max problem frames to show
+};
+
+// ===================== STATE =====================
+let faceDetection = null;
+let isProcessing = false;
+
+// ===================== DOM =====================
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const videoPreview = document.getElementById('videoPreview');
+const processingArea = document.getElementById('processingArea');
+const resultsArea = document.getElementById('resultsArea');
+const progressBar = document.getElementById('progressBar');
+const progressPercent = document.getElementById('progressPercent');
+const progressText = document.getElementById('progressText');
+const canvas = document.getElementById('processCanvas');
+const ctx = canvas.getContext('2d');
+
+// ===================== FILE UPLOAD =====================
+fileInput.addEventListener('change', handleFile);
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) handleFile({target: {files: [files[0]]}});
+});
+
+async function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const maxSize = 500 * 1024 * 1024;
+  if (file.size > maxSize) {
+    alert('文件过大，最大支持 500MB');
+    return;
+  }
+
+  // Show video preview
+  const url = URL.createObjectURL(file);
+  videoPreview.innerHTML = `<div class="video-wrap"><video id="srcVideo" src="${url}" controls></video></div>`;
+  dropZone.style.display = 'none';
+
+  // Start processing when video is ready
+  const video = document.getElementById('srcVideo');
+  video.addEventListener('loadedmetadata', () => startProcessing(video, file));
+}
+
+// ===================== MEDIAPIPE INIT =====================
+async function initFaceDetection() {
+  if (faceDetection) return;
+  faceDetection = new FaceDetection({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`
+  });
+  await faceDetection.setOptions({
+    model: 'short',
+    minDetectionConfidence: 0.5
+  });
+}
+
+// ===================== PROCESSING =====================
+async function startProcessing(video, file) {
+  if (isProcessing) return;
+  isProcessing = true;
+
+  processingArea.style.display = 'block';
+  resultsArea.style.display = 'none';
+  progressText.textContent = '加载人脸检测模型...';
+
+  try {
+    await initFaceDetection();
+  } catch (err) {
+    progressText.textContent = '模型加载失败: ' + err.message;
+    isProcessing = false;
+    return;
+  }
+
+  const fps = 30; // assume 30fps if unknown
+  const duration = video.duration || 0;
+  const totalFrames = Math.floor(duration * fps);
+  const sampleInterval = Math.max(1, Math.floor(fps / CONFIG.sampleRate));
+  const targetFrames = [];
+  for (let i = 0; i < totalFrames; i += sampleInterval) {
+    targetFrames.push(i);
+  }
+
+  // Adjust for short videos
+  let effectiveSampleRate = CONFIG.sampleRate;
+  if (duration <= 5) effectiveSampleRate = 10;
+  else if (duration > 120) effectiveSampleRate = 3;
+
+  const sampleInterval2 = Math.max(1, Math.floor(fps / effectiveSampleRate));
+  const targetFrames2 = [];
+  for (let i = 0; i < totalFrames; i += sampleInterval2) {
+    targetFrames2.push(i);
+  }
+
+  const results = {
+    videoInfo: {
+      name: file.name,
+      duration: duration,
+      width: video.videoWidth,
+      height: video.videoHeight,
+      fps: fps,
+      sampledFrames: targetFrames2.length
+    },
+    persons: {},
+    problemFrames: [],
+    screenshots: []
+  };
+
+  let nextId = 1;
+  const tracks = []; // {id, bbox, lastFrame, missed, framesSeen}
+
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+
+  for (let idx = 0; idx < targetFrames2.length; idx++) {
+    const frameIdx = targetFrames2[idx];
+    const time = frameIdx / fps;
+
+    // Update progress
+    const pct = Math.round((idx / targetFrames2.length) * 100);
+    progressBar.style.width = pct + '%';
+    progressPercent.textContent = pct + '%';
+    progressText.textContent = `分析帧 ${idx + 1}/${targetFrames2.length} · 时间 ${formatTime(time)}`;
+
+    // Seek to frame
+    video.currentTime = time;
+    await new Promise(r => {
+      const onSeek = () => { video.removeEventListener('seeked', onSeek); r(); };
+      video.addEventListener('seeked', onSeek);
+    });
+
+    // Draw to canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Detect faces
+    let detections = [];
+    try {
+      const mpResult = await faceDetection.send({image: canvas});
+      if (mpResult.detections) {
+        detections = mpResult.detections.map(d => {
+          const bb = d.locationData.relativeBoundingBox;
+          const x = bb.xmin * canvas.width;
+          const y = bb.ymin * canvas.height;
+          const w = bb.width * canvas.width;
+          const h = bb.height * canvas.height;
+          return {
+            bbox: [x, y, x + w, y + h],
+            score: d.score[0]
+          };
+        }).filter(d => {
+          const w = d.bbox[2] - d.bbox[0];
+          const h = d.bbox[3] - d.bbox[1];
+          return w >= CONFIG.minFaceSize && h >= CONFIG.minFaceSize;
+        });
+      }
+    } catch (e) {
+      // Skip frame on error
+      continue;
+    }
+
+    // Track faces (simple IOU)
+    const matched = new Set();
+    for (const det of detections) {
+      let bestIou = 0.3;
+      let bestTrack = null;
+      for (const track of tracks) {
+        if (track.missed > 5) continue;
+        const iou = computeIou(det.bbox, track.bbox);
+        if (iou > bestIou) {
+          bestIou = iou;
+          bestTrack = track;
+        }
+      }
+      if (bestTrack) {
+        bestTrack.bbox = det.bbox;
+        bestTrack.missed = 0;
+        bestTrack.framesSeen++;
+        det.trackId = bestTrack.id;
+        matched.add(bestTrack.id);
+      } else {
+        const newTrack = {
+          id: nextId++,
+          bbox: det.bbox,
+          missed: 0,
+          framesSeen: 1,
+          firstFrame: frameIdx,
+          lastFrame: frameIdx
+        };
+        tracks.push(newTrack);
+        det.trackId = newTrack.id;
+        matched.add(newTrack.id);
+      }
+    }
+    // Increment missed for unmatched tracks
+    for (const track of tracks) {
+      if (!matched.has(track.id)) track.missed++;
+    }
+
+    // Check clarity for each detection
+    for (const det of detections) {
+      const [x1, y1, x2, y2] = det.bbox.map(Math.round);
+      const w = x2 - x1, h = y2 - y1;
+      if (w <= 0 || h <= 0) continue;
+
+      const roi = ctx.getImageData(x1, y1, w, h);
+      const clarity = computeClarity(roi);
+      const mosaicScore = checkMosaic(roi);
+      const solidScore = checkSolid(roi);
+
+      const isObscured = clarity < CONFIG.clarityThreshold || mosaicScore > 0.3 || solidScore;
+      det.isObscured = isObscured;
+      det.clarity = clarity;
+
+      // Record for person
+      if (!results.persons[det.trackId]) {
+        results.persons[det.trackId] = {
+          id: det.trackId,
+          framesTotal: 0,
+          framesProtected: 0,
+          firstTime: formatTime(time),
+          lastTime: formatTime(time),
+          problems: []
+        };
+      }
+      const p = results.persons[det.trackId];
+      p.framesTotal++;
+      p.lastTime = formatTime(time);
+      if (isObscured) {
+        p.framesProtected++;
+      } else {
+        p.problems.push({time: formatTime(time), frameIdx, bbox: det.bbox});
+        results.problemFrames.push({
+          time: formatTime(time),
+          frameIdx,
+          trackId: det.trackId,
+          bbox: det.bbox,
+          clarity: clarity.toFixed(1)
+        });
+        // Take screenshot
+        if (results.screenshots.length < CONFIG.maxScreenshots) {
+          const scCanvas = document.createElement('canvas');
+          scCanvas.width = canvas.width;
+          scCanvas.height = canvas.height;
+          const scCtx = scCanvas.getContext('2d');
+          scCtx.drawImage(canvas, 0, 0);
+          // Draw annotation
+          scCtx.strokeStyle = '#ef4444';
+          scCtx.lineWidth = 3;
+          scCtx.setLineDash([8, 6]);
+          scCtx.strokeRect(x1, y1, w, h);
+          scCtx.fillStyle = '#ef4444';
+          scCtx.font = 'bold 16px sans-serif';
+          scCtx.fillText(`Person #${det.trackId} · ${formatTime(time)}`, x1, y1 - 8);
+          scCtx.setLineDash([]);
+          results.screenshots.push({
+            dataUrl: scCanvas.toDataURL('image/jpeg', 0.85),
+            time: formatTime(time),
+            trackId: det.trackId
+          });
+        }
+      }
+    }
+  }
+
+  progressBar.style.width = '100%';
+  progressPercent.textContent = '100%';
+  progressText.textContent = '完成！';
+  processingArea.style.display = 'none';
+
+  showResults(results);
+  isProcessing = false;
+}
+
+// ===================== UTILS =====================
+function computeIou(a, b) {
+  const xi = Math.max(a[0], b[0]), yi = Math.max(a[1], b[1]);
+  const x2 = Math.min(a[2], b[2]), y2 = Math.min(a[3], b[3]);
+  const inter = Math.max(0, x2 - xi) * Math.max(0, y2 - yi);
+  const areaA = (a[2] - a[0]) * (a[3] - a[1]);
+  const areaB = (b[2] - b[0]) * (b[3] - b[1]);
+  return inter / (areaA + areaB - inter + 1e-6);
+}
+
+function computeClarity(imageData) {
+  const data = imageData.data;
+  const w = imageData.width;
+  const h = imageData.height;
+  let sum = 0, sumSq = 0, count = 0;
+  // Sample every 4th pixel for speed
+  for (let y = 1; y < h - 1; y += 2) {
+    for (let x = 1; x < w - 1; x += 2) {
+      const i = (y * w + x) * 4;
+      const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      const iu = ((y - 1) * w + x) * 4;
+      const id = ((y + 1) * w + x) * 4;
+      const il = (y * w + (x - 1)) * 4;
+      const ir = (y * w + (x + 1)) * 4;
+      const gu = 0.299 * data[iu] + 0.587 * data[iu + 1] + 0.114 * data[iu + 2];
+      const gd = 0.299 * data[id] + 0.587 * data[id + 1] + 0.114 * data[id + 2];
+      const gl = 0.299 * data[il] + 0.587 * data[il + 1] + 0.114 * data[il + 2];
+      const gr = 0.299 * data[ir] + 0.587 * data[ir + 1] + 0.114 * data[ir + 2];
+      const lap = Math.abs(4 * gray - gu - gd - gl - gr);
+      sum += lap;
+      sumSq += lap * lap;
+      count++;
+    }
+  }
+  if (count === 0) return 0;
+  const mean = sum / count;
+  return sumSq / count - mean * mean;
+}
+
+function checkMosaic(imageData, blockSize = 8) {
+  const data = imageData.data;
+  const w = imageData.width;
+  const h = imageData.height;
+  let lowVar = 0, total = 0;
+  for (let by = 0; by < h - blockSize; by += blockSize) {
+    for (let bx = 0; bx < w - blockSize; bx += blockSize) {
+      let sum = 0, sumSq = 0, cnt = 0;
+      for (let y = by; y < by + blockSize; y++) {
+        for (let x = bx; x < bx + blockSize; x++) {
+          const i = (y * w + x) * 4;
+          const g = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          sum += g; sumSq += g * g; cnt++;
+        }
+      }
+      const mean = sum / cnt;
+      const var_ = sumSq / cnt - mean * mean;
+      if (var_ < 5) lowVar++;
+      total++;
+    }
+  }
+  return total > 0 ? lowVar / total : 0;
+}
+
+function checkSolid(imageData) {
+  const data = imageData.data;
+  const n = data.length / 4;
+  let sumR = 0, sumG = 0, sumB = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    sumR += data[i]; sumG += data[i + 1]; sumB += data[i + 2];
+  }
+  const meanR = sumR / n, meanG = sumG / n, meanB = sumB / n;
+  let varR = 0, varG = 0, varB = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    varR += (data[i] - meanR) ** 2;
+    varG += (data[i + 1] - meanG) ** 2;
+    varB += (data[i + 2] - meanB) ** 2;
+  }
+  const avgStd = (Math.sqrt(varR / n) + Math.sqrt(varG / n) + Math.sqrt(varB / n)) / 3;
+  return avgStd < 8;
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  const ms = Math.floor((sec % 1) * 1000);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+}
+
+// ===================== SHOW RESULTS =====================
+function showResults(results) {
+  const persons = Object.values(results.persons);
+  const totalProblems = results.problemFrames.length;
+  const totalSampled = results.videoInfo.sampledFrames;
+  const problemRatio = totalSampled > 0 ? totalProblems / totalSampled : 0;
+
+  // Determine status
+  let status = 'passed', risk = 'none';
+  if (totalProblems === 0) { status = 'passed'; risk = 'none'; }
+  else if (problemRatio < 0.005) { status = 'warning'; risk = 'low'; }
+  else if (problemRatio < 0.02) { status = 'failed'; risk = 'medium'; }
+  else { status = 'failed'; risk = 'high'; }
+
+  // Build person cards
+  const personCards = persons.map(p => {
+    const ratio = p.framesTotal > 0 ? p.framesProtected / p.framesTotal : 0;
+    let tagClass = 'tag-protected', tagText = '已保护';
+    if (p.framesProtected === 0) { tagClass = 'tag-exposed'; tagText = '未打码'; }
+    else if (p.framesProtected < p.framesTotal) { tagClass = 'tag-risk'; tagText = '漏打风险'; }
+
+    const problemList = p.problems.slice(0, 5).map(pr =>
+      `<div class="timeline-item"><span class="timeline-time">${pr.time}</span><span class="timeline-text">人物 #${p.id} — 人脸露出</span></div>`
+    ).join('');
+
+    return `
+      <div class="person-card fade-in">
+        <div class="row">
+          <div>
+            <span class="name">人物 #${p.id}</span>
+            <span class="tag ${tagClass}">${tagText}</span>
+          </div>
+          <div style="font-family:monospace;font-size:15px;font-weight:600">${p.framesProtected}/${p.framesTotal}</div>
         </div>
-    </footer>
+        <div class="meta">首次出现: ${p.firstTime} · 最后出现: ${p.lastTime}${p.problems.length > 0 ? ` · <span style="color:var(--red)">${p.problems.length} 处问题</span>` : ''}</div>
+        ${p.problems.length > 0 ? `<div class="timeline">${problemList}${p.problems.length > 5 ? `<div style="text-align:center;padding:8px;color:var(--ink-muted);font-size:13px">... 还有 ${p.problems.length - 5} 处</div>` : ''}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  // Build screenshot gallery
+  const gallery = results.screenshots.length > 0 ? `
+    <h2 class="section-title">📸 问题帧截图</h2>
+    <div class="gallery">
+      ${results.screenshots.map(sc => `
+        <div class="gallery-item">
+          <img src="${sc.dataUrl}" alt="">
+          <div class="caption">Person #${sc.trackId} · ${sc.time}</div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  // Banner
+  const bannerHtml = status === 'passed' ? `
+    <div class="result-banner pass fade-in">
+      <div class="emoji">✅</div>
+      <h2>检测通过</h2>
+      <p>未发现明显问题 · ${persons.length} 个人物 · ${totalSampled} 帧已检测</p>
+    </div>
+  ` : `
+    <div class="result-banner fail fade-in">
+      <div class="emoji">⚠️</div>
+      <h2>发现问题</h2>
+      <p>${totalProblems} 个问题帧 (${(problemRatio * 100).toFixed(1)}%) · ${persons.length} 个人物 · 风险等级: ${risk.toUpperCase()}</p>
+    </div>
+  `;
+
+  resultsArea.innerHTML = `
+    ${bannerHtml}
+    <div class="stats-grid fade-in">
+      <div class="stat-card"><div class="stat-value">${results.videoInfo.name}</div><div class="stat-label">文件名</div></div>
+      <div class="stat-card"><div class="stat-value">${formatTime(results.videoInfo.duration)}</div><div class="stat-label">时长</div></div>
+      <div class="stat-card"><div class="stat-value">${persons.length}</div><div class="stat-label">人物数</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:${totalProblems > 0 ? 'var(--red)' : 'var(--green)'}">${totalProblems}</div><div class="stat-label">问题帧</div></div>
+    </div>
+    <h2 class="section-title">👤 人物状态详情</h2>
+    ${personCards}
+    ${gallery}
+    <div style="margin-top:32px;text-align:center">
+      <button class="btn btn-primary" onclick="location.reload()">🔄 检测新视频</button>
+    </div>
+  `;
+  resultsArea.style.display = 'block';
+  resultsArea.scrollIntoView({behavior: 'smooth'});
+}
+</script>
 </body>
 </html>
