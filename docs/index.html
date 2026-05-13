@@ -273,15 +273,24 @@ async function handleFile(e) {
 }
 
 // ===================== MEDIAPIPE INIT =====================
+let currentMpResult = null;
+
 async function initFaceDetection() {
   if (faceDetection) return;
   faceDetection = new FaceDetection({
     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`
   });
+  faceDetection.onResults((results) => {
+    currentMpResult = results;
+  });
   await faceDetection.setOptions({
     model: 'short',
     minDetectionConfidence: 0.5
   });
+  // Warm-up with a tiny canvas to ensure model is loaded
+  const warmCanvas = document.createElement('canvas');
+  warmCanvas.width = 1; warmCanvas.height = 1;
+  await faceDetection.send({image: warmCanvas});
 }
 
 // ===================== PROCESSING =====================
@@ -361,12 +370,13 @@ async function startProcessing(video, file) {
     // Draw to canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Detect faces
+    // Detect faces (use onResults callback)
     let detections = [];
     try {
-      const mpResult = await faceDetection.send({image: canvas});
-      if (mpResult.detections) {
-        detections = mpResult.detections.map(d => {
+      currentMpResult = null;
+      await faceDetection.send({image: canvas});
+      if (currentMpResult && currentMpResult.detections) {
+        detections = currentMpResult.detections.map(d => {
           const bb = d.locationData.relativeBoundingBox;
           const x = bb.xmin * canvas.width;
           const y = bb.ymin * canvas.height;
